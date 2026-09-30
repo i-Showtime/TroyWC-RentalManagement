@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using TroyWC_RentalManagement.Data;
+using TroyWC_RentalManagement.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +12,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => 
+    options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
@@ -21,27 +26,14 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    context.Database.Migrate(); // Apply pending migrations   
+}
     app.UseMigrationsEndPoint();
     app.MapOpenApi();
-    app.MapScalarApiReference();
-    //app.MapScalarApiReference(options =>
-    //{
-    //    options.WithTitle("Rent API")
-    //           .WithClassicLayout()
-    //           .ForceDarkMode()
-    //           .HideSearch()
-    //           .ShowOperationId()
-    //           .ExpandAllTags()
-    //           .SortTagsAlphabetically()
-    //           .SortOperationsByMethod()
-    //           .PreserveSchemaPropertyOrder();
-
-    //});
-    //app.MapSwagger();
-    //app.UseSwaggerUI(options =>
-    //{
-    //    options.SwaggerEndpoint("v1/swagger.json", "My API V1");
-    //});
+    app.MapScalarApiReference();    
 }
 else
 {
@@ -54,7 +46,23 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.MapControllers();
+
 app.UseAuthorization();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider
+        .GetRequiredService<RoleManager<IdentityRole>>();
+
+    if (!await roleManager.RoleExistsAsync(Roles.Applicant))
+       _ = await roleManager.CreateAsync(new IdentityRole(Roles.Applicant));
+
+    if (!await roleManager.RoleExistsAsync(Roles.PropertyManager))
+       _ = await roleManager.CreateAsync(new IdentityRole(Roles.PropertyManager));
+
+    
+}
 
 app.MapStaticAssets();
 app.MapRazorPages()

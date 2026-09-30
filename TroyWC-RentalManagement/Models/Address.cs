@@ -22,4 +22,3 @@ public class Address
     public string PostalCode { get; set; } = string.Empty;
 
 }
-
