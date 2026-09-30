@@ -8,20 +8,14 @@ namespace TroyWC_RentalManagement.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AddressController : ControllerBase
+public class PropertiesController : ControllerBase
 {
     ApplicationDbContext _context;
 
-    public AddressController(ApplicationDbContext context)
+    public PropertiesController(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<Address>> GetAddresses()
-    {
-        var result = await _context.Addresses.ToListAsync();
-        return Ok(result);
-             
-    }
+
 }
