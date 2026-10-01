@@ -1,0 +1,22 @@
+@model GridViewModel
+@{
+    ViewData["Title"] = "Properties";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Properties</h1>
+    <button type="button" class="btn btn-primary" data-crud-modal="@Url.Action("Create")" data-grid-target="#properties-grid">
+        New property
+    </button>
+</div>
+
+<div id="properties-grid" data-grid data-grid-url="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)">
+    <partial name="_Grid" model="Model" />
+</div>
+
+<partial name="_CrudModal" />
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+    <script src="~/js/crud-grid.js" asp-append-version="true"></script>
+}

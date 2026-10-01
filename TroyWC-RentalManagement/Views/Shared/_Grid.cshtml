@@ -1,0 +1,97 @@
+@* Reusable paged/sortable grid. Wrap in <div data-grid data-grid-url="..."> and load ~/js/crud-grid.js. *@
+@model GridViewModel
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead>
+            <tr>
+                @foreach (var header in Model.Headers)
+                {
+                    <th scope="col" aria-sort="@(header.IsSorted ? (header.Desc ? "descending" : "ascending") : null)">
+                        @if (header.SortKey is null)
+                        {
+                            @header.Title
+                        }
+                        else
+                        {
+                            <a class="text-reset text-decoration-none text-nowrap" data-grid-nav asp-all-route-data="Model.SortLink(header)">
+                                @header.Title
+                                @if (header.IsSorted)
+                                {
+                                    <span aria-hidden="true">@(header.Desc ? "▼" : "▲")</span>
+                                }
+                            </a>
+                        }
+                    </th>
+                }
+                @if (Model.HasActions)
+                {
+                    <th scope="col"><span class="visually-hidden">Actions</span></th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Rows.Count == 0)
+            {
+                <tr>
+                    <td colspan="@Model.ColumnCount" class="text-center text-muted py-4">@Model.EmptyMessage</td>
+                </tr>
+            }
+            @foreach (var row in Model.Rows)
+            {
+                <tr data-key="@row.Key">
+                    @foreach (var cell in row.Cells)
+                    {
+                        <td>@cell</td>
+                    }
+                    @if (Model.HasActions)
+                    {
+                        <td class="text-end text-nowrap">
+                            @foreach (var action in row.Actions)
+                            {
+                                if (action.OpensModal)
+                                {
+                                    <button type="button" class="@action.CssClass" data-crud-modal="@action.Url">@action.Label</button>
+                                }
+                                else
+                                {
+                                    <a class="@action.CssClass" href="@action.Url">@action.Label</a>
+                                }
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalCount > 0)
+{
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <small class="text-muted">Showing @Model.FirstItem–@Model.LastItem of @Model.TotalCount</small>
+
+        @if (Model.TotalPages > 1)
+        {
+            var first = Math.Max(1, Model.Page - 2);
+            var last = Math.Min(Model.TotalPages, Model.Page + 2);
+
+            <nav aria-label="Pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.Page == 1 ? "disabled" : null)">
+                        <a class="page-link" data-grid-nav asp-all-route-data="Model.PageLink(Model.Page - 1)">Previous</a>
+                    </li>
+                    @for (var p = first; p <= last; p++)
+                    {
+                        <li class="page-item @(p == Model.Page ? "active" : null)" aria-current="@(p == Model.Page ? "page" : null)">
+                            <a class="page-link" data-grid-nav asp-all-route-data="Model.PageLink(p)">@p</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.Page == Model.TotalPages ? "disabled" : null)">
+                        <a class="page-link" data-grid-nav asp-all-route-data="Model.PageLink(Model.Page + 1)">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+}

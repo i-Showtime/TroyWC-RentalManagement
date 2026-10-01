@@ -26,8 +26,17 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
+                        @if (User.IsInRole(TroyWC_RentalManagement.Models.Roles.PropertyManager))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Manage" asp-controller="Properties" asp-action="Index">Properties</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Manage" asp-controller="Units" asp-action="Index">Units</a>
+                            </li>
+                        }
                     </ul>
-                    <partial name="_LoginPartial" />
+                    <partial name="/Pages/Shared/_LoginPartial.cshtml" />
                 </div>
             </div>
         </nav>

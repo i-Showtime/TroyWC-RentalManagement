@@ -1,0 +1,36 @@
+@model UnitsIndexViewModel
+@{
+    ViewData["Title"] = "Units";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Units</h1>
+    <button type="button" class="btn btn-primary" data-crud-modal="@Url.Action("Create", new { propertyId = Model.PropertyId })" data-grid-target="#units-grid">
+        New unit
+    </button>
+</div>
+
+<form method="get" asp-action="Index" class="row g-2 align-items-center mb-3">
+    <div class="col-auto">
+        <label asp-for="PropertyId" class="col-form-label">Property</label>
+    </div>
+    <div class="col-auto">
+        <select asp-for="PropertyId" asp-items="Model.Properties" class="form-select" onchange="this.form.submit()">
+            <option value="">All properties</option>
+        </select>
+    </div>
+    <noscript>
+        <div class="col-auto"><button type="submit" class="btn btn-outline-secondary">Filter</button></div>
+    </noscript>
+</form>
+
+<div id="units-grid" data-grid data-grid-url="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)">
+    <partial name="_Grid" model="Model.Grid" />
+</div>
+
+<partial name="_CrudModal" />
+
+@section Scripts {
+    <partial name="/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+    <script src="~/js/crud-grid.js" asp-append-version="true"></script>
+}
