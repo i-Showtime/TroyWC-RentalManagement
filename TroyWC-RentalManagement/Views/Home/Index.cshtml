@@ -1,0 +1,23 @@
+@model GridViewModel
+@{
+    ViewData["Title"] = "Available units";
+}
+
+<h1 class="h3 mb-3">Available units</h1>
+
+<partial name="_FlashMessages" />
+
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <p class="text-muted">
+        <a asp-area="Identity" asp-page="/Account/Login">Log in</a> as an applicant to apply for a unit.
+    </p>
+}
+
+<div id="units-grid" data-grid data-grid-url="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)">
+    <partial name="_Grid" model="Model" />
+</div>
+
+@section Scripts {
+    <script src="~/js/crud-grid.js" asp-append-version="true"></script>
+}

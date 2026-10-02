@@ -1,0 +1,71 @@
+@model RentalApplicationViewModel
+@{
+    ViewData["Title"] = "Rental application";
+
+    var steps = new[]
+    {
+        (Step: ApplicationStep.Applicant, Title: "Applicant info", Done: Model.ApplicantInfoCompleted),
+        (Step: ApplicationStep.Residences, Title: "Residence history", Done: Model.ResidenceHistoryCompleted),
+        (Step: ApplicationStep.Review, Title: "Review & submit", Done: Model.Status != AppStatus.Draft && Model.Status != AppStatus.Returned),
+    };
+
+    var statusClass = Model.Status switch
+    {
+        AppStatus.Draft or AppStatus.Returned => "text-bg-secondary",
+        AppStatus.Approved => "text-bg-success",
+        AppStatus.Denied or AppStatus.Withdrawn => "text-bg-danger",
+        _ => "text-bg-primary",
+    };
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <h1 class="h3 mb-1">Rental application</h1>
+        <div class="text-muted">
+            @Model.Unit.PropertyName – unit @Model.Unit.UnitNumber · @Model.Unit.BedroomsLabel · @Model.Unit.RentAmount.ToString("C")/month
+        </div>
+    </div>
+    <span class="badge fs-6 @statusClass">@Model.StatusLabel</span>
+</div>
+
+<partial name="_FlashMessages" />
+
+@if (!Model.IsEditable)
+{
+    <div class="alert alert-info" role="status">
+        This application is @Model.StatusLabel.ToLowerInvariant() and can no longer be changed.
+    </div>
+}
+else if (Model.Status == AppStatus.Returned)
+{
+    <div class="alert alert-warning" role="status">
+        This application was returned to you. Make any changes needed and submit it again.
+    </div>
+}
+
+<ol class="nav nav-pills nav-fill flex-column flex-sm-row gap-2 mb-4 ps-0" aria-label="Application steps">
+    @for (var i = 0; i < steps.Length; i++)
+    {
+        var step = steps[i];
+        var current = step.Step == Model.Step;
+        <li class="nav-item">
+            <span class="nav-link border @(current ? "active" : "text-body")" aria-current="@(current ? "step" : null)">
+                <span class="badge rounded-pill @(current ? "text-bg-light" : step.Done ? "text-bg-success" : "text-bg-secondary") me-1">
+                    @(step.Done ? "✓" : (i + 1).ToString())
+                </span>
+                @step.Title
+            </span>
+        </li>
+    }
+</ol>
+
+@(Model.Step switch
+{
+    ApplicationStep.Applicant => await Component.InvokeAsync("ApplicantInfo", new { model = Model }),
+    ApplicationStep.Residences => await Component.InvokeAsync("ResidenceHistory", new { model = Model }),
+    _ => await Component.InvokeAsync("ApplicationReview", new { model = Model }),
+})
+
+@section Scripts {
+    <script src="~/js/rental-application.js" asp-append-version="true"></script>
+}

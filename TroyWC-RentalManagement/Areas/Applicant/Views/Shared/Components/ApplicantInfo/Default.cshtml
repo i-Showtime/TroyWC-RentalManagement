@@ -1,0 +1,56 @@
+@* Step 1. novalidate: nothing is checked until Continue is pressed, and Save must accept anything. *@
+@model RentalApplicationViewModel
+@{
+    var isNew = Model.Id is null;
+}
+
+<form method="post" novalidate
+      asp-controller="Applications" asp-action="@(isNew ? "Apply" : "Applicant")"
+      asp-route-unitId="@(isNew ? Model.UnitId : null)" asp-route-id="@Model.Id">
+    <input type="hidden" asp-for="RowVersion" />
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+    <fieldset disabled="@(!Model.IsEditable)">
+        <legend class="h5">Your information</legend>
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label asp-for="Applicant.FirstName" class="form-label"></label>
+                <input asp-for="Applicant.FirstName" class="form-control" maxlength="100" autocomplete="given-name" />
+                <span asp-validation-for="Applicant.FirstName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Applicant.LastName" class="form-label"></label>
+                <input asp-for="Applicant.LastName" class="form-control" maxlength="100" autocomplete="family-name" />
+                <span asp-validation-for="Applicant.LastName" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Applicant.Phone" class="form-label"></label>
+                <input asp-for="Applicant.Phone" class="form-control" maxlength="50" autocomplete="tel" />
+                <span asp-validation-for="Applicant.Phone" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Applicant.Email" class="form-label"></label>
+                <input asp-for="Applicant.Email" class="form-control" maxlength="320" autocomplete="email" />
+                <span asp-validation-for="Applicant.Email" class="text-danger"></span>
+            </div>
+        </div>
+
+        <h2 class="h6 mt-4">Current address</h2>
+        <partial name="_AddressFields" for="Applicant.CurrentAddress" />
+    </fieldset>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a class="btn btn-outline-secondary" asp-area="" asp-controller="Home" asp-action="Index">Back</a>
+        @if (Model.IsEditable)
+        {
+            <div class="d-flex gap-2">
+                <button type="submit" name="Command" value="@WizardCommand.Save" class="btn btn-outline-primary">Save</button>
+                <button type="submit" name="Command" value="@WizardCommand.Continue" class="btn btn-primary">Continue</button>
+            </div>
+        }
+        else
+        {
+            <a class="btn btn-primary" asp-controller="Applications" asp-action="Residences" asp-route-id="@Model.Id">Next</a>
+        }
+    </div>
+</form>

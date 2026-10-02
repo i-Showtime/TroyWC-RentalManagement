@@ -1,0 +1,11 @@
+@* Completion badge for a wizard section; the model is the section's Completed flag. *@
+@model bool
+
+@if (Model)
+{
+    <span class="badge text-bg-success">Complete</span>
+}
+else
+{
+    <span class="badge text-bg-warning">Incomplete</span>
+}

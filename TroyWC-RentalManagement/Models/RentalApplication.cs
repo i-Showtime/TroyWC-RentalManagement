@@ -7,15 +7,21 @@ public class RentalApplication
     public int Id { get; set; }
     public int UnitId { get; set; }
 
-    /// <summary>
-    /// Allowed status values should be defined by the application workflow.
-    /// </summary>
-    [Required, MaxLength(50)]
-    public string Status { get; set; } = null!;
+    /// <summary>Stored as the enum name (see ApplicationDbContext).</summary>
+    public AppStatus Status { get; set; }
 
-    public int? AssignedManagerId { get; set; }
+    [MaxLength(450)]
+    public string? AssignedManagerId { get; set; }
 
-    public int CreatedByUserId { get; set; }
+    /// <summary>Identity user id of the applicant who started the application.</summary>
+    [Required, MaxLength(450)]
+    public string CreatedByUserId { get; set; } = null!;
+
+    /// <summary>Set when the applicant passes Continue on the applicant info section.</summary>
+    public bool ApplicantInfoCompleted { get; set; }
+
+    /// <summary>Set when the applicant passes Continue on the residence history section.</summary>
+    public bool ResidenceHistoryCompleted { get; set; }
 
     public DateTimeOffset Created { get; set; }
 
@@ -48,7 +54,8 @@ public class ApplicationComment
 
     public int ApplicationId { get; set; }
 
-    public int AuthorUserId { get; set; }
+    [Required, MaxLength(450)]
+    public string AuthorUserId { get; set; } = null!;
 
     [Required, MaxLength(4000)]
     public string Body { get; set; } = null!;
@@ -66,7 +73,8 @@ public class ApplicationHistory
 
     public DateTimeOffset OccurredTime { get; set; }
 
-    public int ActorUserId { get; set; }
+    [Required, MaxLength(450)]
+    public string ActorUserId { get; set; } = null!;
 
     [Required, MaxLength(100)]
     public string ActorRole { get; set; } = null!;

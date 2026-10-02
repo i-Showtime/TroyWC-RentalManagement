@@ -32,12 +32,23 @@ public class AddressDTO
         PostalCode = address.PostalCode,
     };
 
+    /// <summary>"Line1, Line2, City, State PostalCode", skipping blank parts.</summary>
+    public string ToSingleLine()
+    {
+        var region = string.Join(" ", new[] { State, PostalCode }.Where(p => !string.IsNullOrWhiteSpace(p)));
+        return string.Join(", ", new[] { Line1, Line2, City, region }.Where(p => !string.IsNullOrWhiteSpace(p)));
+    }
+
+    /// <summary>
+    /// Null-safe so it can also save unvalidated input (model binding turns empty fields into null);
+    /// values are cut to the column lengths for the same reason.
+    /// </summary>
     public void ApplyTo(Address address)
     {
-        address.Line1 = Line1.Trim();
-        address.Line2 = string.IsNullOrWhiteSpace(Line2) ? null : Line2.Trim();
-        address.City = City.Trim();
-        address.State = State.Trim();
-        address.PostalCode = PostalCode.Trim();
+        address.Line1 = InputText.Clean(Line1, 200) ?? string.Empty;
+        address.Line2 = InputText.Clean(Line2, 200);
+        address.City = InputText.Clean(City, 100) ?? string.Empty;
+        address.State = InputText.Clean(State, 50) ?? string.Empty;
+        address.PostalCode = InputText.Clean(PostalCode, 20) ?? string.Empty;
     }
 }

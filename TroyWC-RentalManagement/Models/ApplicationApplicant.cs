@@ -9,7 +9,9 @@ public class ApplicationApplicant
 
     public int ApplicationId { get; set; }
 
-    public int UserId { get; set; }
+    /// <summary>Identity user id of the applicant.</summary>
+    [Required, MaxLength(450)]
+    public string UserId { get; set; } = null!;
 
     /// <summary>
     /// Denormalized copy of RentalApplication.UnitId.

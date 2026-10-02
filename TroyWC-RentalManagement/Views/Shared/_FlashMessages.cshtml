@@ -1,0 +1,9 @@
+@* One-off messages set in TempData before a redirect (see Models/FlashMessages.cs). *@
+@if (TempData[FlashMessages.Success] is string success)
+{
+    <div class="alert alert-success" role="status">@success</div>
+}
+@if (TempData[FlashMessages.Error] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}

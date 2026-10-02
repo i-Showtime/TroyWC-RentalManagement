@@ -1,6 +1,6 @@
-namespace TroyWC_RentalManagement.Areas.Manage.Models;
+namespace TroyWC_RentalManagement.Grid;
 
-/// <summary>Grid row for the Units page. Init-only properties so EF can sort on them after projection.</summary>
+/// <summary>Grid row for unit lists. Init-only properties so EF can sort on them after projection.</summary>
 public class UnitRow
 {
     public int Id { get; init; }

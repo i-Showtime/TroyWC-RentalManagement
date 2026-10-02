@@ -1,0 +1,30 @@
+@* Address inputs. Render with <partial name="_AddressFields" for="Some.Address" /> so names get the prefix. *@
+@model AddressDTO
+
+<div class="mb-3">
+    <label asp-for="Line1" class="form-label"></label>
+    <input asp-for="Line1" class="form-control" maxlength="200" autocomplete="address-line1" />
+    <span asp-validation-for="Line1" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="Line2" class="form-label"></label>
+    <input asp-for="Line2" class="form-control" maxlength="200" autocomplete="address-line2" />
+    <span asp-validation-for="Line2" class="text-danger"></span>
+</div>
+<div class="row g-3">
+    <div class="col-md-5">
+        <label asp-for="City" class="form-label"></label>
+        <input asp-for="City" class="form-control" maxlength="100" autocomplete="address-level2" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="State" class="form-label"></label>
+        <input asp-for="State" class="form-control" maxlength="50" autocomplete="address-level1" />
+        <span asp-validation-for="State" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="PostalCode" class="form-label"></label>
+        <input asp-for="PostalCode" class="form-control" maxlength="20" autocomplete="postal-code" />
+        <span asp-validation-for="PostalCode" class="text-danger"></span>
+    </div>
+</div>

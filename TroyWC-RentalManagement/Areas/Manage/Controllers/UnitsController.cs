@@ -30,14 +30,7 @@ public class UnitsController(ApplicationDbContext context) : Controller
             : new Dictionary<string, string> { ["propertyId"] = propertyId.Value.ToString() };
 
         var gridModel = await query
-            .Select(u => new UnitRow
-            {
-                Id = u.Id,
-                PropertyName = u.Property.Name,
-                UnitNumber = u.UnitNumber,
-                Bedrooms = u.Bedrooms,
-                RentAmount = u.RentAmount,
-            })
+            .Select(UnitGrid.ToRow)
             .ToGridAsync(BuildGrid(), grid, routeValues, ct);
 
         if (Request.IsAjax())
@@ -199,17 +192,10 @@ public class UnitsController(ApplicationDbContext context) : Controller
 
     private GridDefinition<UnitRow> BuildGrid() => new()
     {
-        Columns =
-        [
-            GridColumn<UnitRow>.For(r => r.PropertyName, "Property"),
-            GridColumn<UnitRow>.For(r => r.UnitNumber, "Unit #", sortKey: "unit"),
-            GridColumn<UnitRow>.For(r => r.Bedrooms, "Bedrooms",
-                display: bedrooms => bedrooms == 0 ? "Studio" : bedrooms.ToString()),
-            GridColumn<UnitRow>.For(r => r.RentAmount, "Rent", format: "C"),
-        ],
+        Columns = UnitGrid.Columns,
         Key = r => r.Id,
-        DefaultSort = "property",
-        ThenBy = ["unit"],
+        DefaultSort = UnitGrid.DefaultSort,
+        ThenBy = UnitGrid.ThenBy,
         Actions =
         [
             new("Edit", r => Url.Action(nameof(Edit), new { id = r.Id })!),
