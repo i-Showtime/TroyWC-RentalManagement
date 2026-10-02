@@ -1,6 +1,7 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using TroyWC_RentalManagement.bogus;
 using TroyWC_RentalManagement.Data;
 using TroyWC_RentalManagement.Models;
 
@@ -20,6 +21,9 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddRazorPages();
+
+builder.Services.Configure<SeedDataOptions>(builder.Configuration.GetSection(SeedDataOptions.SectionName));
+builder.Services.AddScoped<DevDataSeeder>();
 
 var app = builder.Build();
 
@@ -61,7 +65,9 @@ using (var scope = app.Services.CreateScope())
     if (!await roleManager.RoleExistsAsync(Roles.PropertyManager))
        _ = await roleManager.CreateAsync(new IdentityRole(Roles.PropertyManager));
 
-    
+    // Test data from bogus/DevDataSeeder.cs; logins are in appsettings.Development.json (SeedData).
+    if (app.Environment.IsDevelopment())
+        await scope.ServiceProvider.GetRequiredService<DevDataSeeder>().SeedAsync();
 }
 
 app.MapStaticAssets();
