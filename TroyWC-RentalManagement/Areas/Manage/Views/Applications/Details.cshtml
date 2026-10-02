@@ -1,0 +1,135 @@
+@* One form for every decision: each button posts the shared comment, lease dates and row version to its own action. *@
+@model ApplicationDetailsViewModel
+@{
+    ViewData["Title"] = "Application review";
+    var unit = Model.Application.Unit;
+    var applicant = Model.Application.Applicant;
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <a asp-action="Index" class="small">&larr; All applications</a>
+        <h1 class="h3 mb-1">@applicant.FirstName @applicant.LastName</h1>
+        <div class="text-muted">
+            @unit.PropertyName – unit @unit.UnitNumber · @unit.BedroomsLabel · @unit.RentAmount.ToString("C")/month
+        </div>
+        @if (Model.AssignedManager is not null)
+        {
+            <div class="small text-muted">Assigned to @Model.AssignedManager</div>
+        }
+    </div>
+    <span class="badge fs-6 @Model.Status.ToBadgeClass()">@Model.Status.ToLabel()</span>
+</div>
+
+<partial name="_FlashMessages" />
+@if (Model.Status == AppStatus.Draft)
+{
+    <div class="alert alert-info" role="status">
+        The applicant hasn't submitted this application yet, so it may be incomplete. You can review it once it's submitted.
+    </div>
+}
+<div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <partial name="_ApplicationSummary" model="Model.Application" />
+
+        @if (Model.Lease is not null)
+        {
+            <section class="card mb-3 border-success">
+                <div class="card-header"><h2 class="h6 mb-0">Lease</h2></div>
+                <div class="card-body">
+                    @Model.Lease.StartDate.ToString("MMM d, yyyy") – @(Model.Lease.EndDate?.ToString("MMM d, yyyy") ?? "open-ended")
+                    <span class="badge @(Model.Lease.Status == LeaseStatus.Active ? "text-bg-success" : "text-bg-secondary") ms-2">@Model.Lease.Status</span>
+                </div>
+            </section>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        @if (Model.HasDecisions)
+        {
+            <form method="post" asp-action="Details" asp-route-id="@Model.Id" class="card mb-3" novalidate>
+                <div class="card-header"><h2 class="h6 mb-0">Decision</h2></div>
+                <div class="card-body">
+                    <input type="hidden" asp-for="Decision.RowVersion" />
+
+                    <div class="mb-3">
+                        <label asp-for="Decision.Comment" class="form-label"></label>
+                        <textarea asp-for="Decision.Comment" class="form-control" rows="3" maxlength="4000"></textarea>
+                        <div class="form-text">Required when returning an application.</div>
+                        <span asp-validation-for="Decision.Comment" class="text-danger"></span>
+                    </div>
+
+                    @if (Model.CanApprove)
+                    {
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <label asp-for="Decision.LeaseStart" class="form-label"></label>
+                                <input asp-for="Decision.LeaseStart" type="date" class="form-control" />
+                                <span asp-validation-for="Decision.LeaseStart" class="text-danger"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <label asp-for="Decision.LeaseEnd" class="form-label"></label>
+                                <input asp-for="Decision.LeaseEnd" type="date" class="form-control" />
+                                <span asp-validation-for="Decision.LeaseEnd" class="text-danger"></span>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="d-flex flex-wrap gap-2">
+                        @if (Model.CanStartReview)
+                        {
+                            <button type="submit" class="btn btn-primary" formaction="@Url.Action("StartReview", new { id = Model.Id })">Start review</button>
+                        }
+                        @if (Model.CanApprove)
+                        {
+                            <button type="submit" class="btn btn-success" formaction="@Url.Action("Approve", new { id = Model.Id })">Approve and create lease</button>
+                        }
+                        @if (Model.CanReturn)
+                        {
+                            <button type="submit" class="btn btn-outline-secondary" formaction="@Url.Action("Return", new { id = Model.Id })">Return to applicant</button>
+                        }
+                        @if (Model.CanDeny)
+                        {
+                            <button type="submit" class="btn btn-outline-danger" formaction="@Url.Action("Deny", new { id = Model.Id })">Deny</button>
+                        }
+                    </div>
+                </div>
+            </form>
+        }
+
+        <section class="card mb-3">
+            <div class="card-header"><h2 class="h6 mb-0">Comments</h2></div>
+            @if (Model.Comments.Count == 0)
+            {
+                <div class="card-body text-muted">No comments yet.</div>
+            }
+            else
+            {
+                <ul class="list-group list-group-flush">
+                    @foreach (var comment in Model.Comments)
+                    {
+                        <li class="list-group-item">
+                            <div>@comment.Body</div>
+                            <div class="small text-muted">@comment.Author · @comment.Created.ToString("MMM d, yyyy h:mm tt")</div>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+
+        <section class="card mb-3">
+            <div class="card-header"><h2 class="h6 mb-0">History</h2></div>
+            <ul class="list-group list-group-flush">
+                @foreach (var entry in Model.History)
+                {
+                    <li class="list-group-item small">
+                        <strong>@entry.From → @entry.To</strong>
+                        <div class="text-muted">@entry.Actor (@entry.ActorRole) · @entry.OccurredTime.ToString("MMM d, yyyy h:mm tt")</div>
+                    </li>
+                }
+            </ul>
+        </section>
+    </div>
+</div>

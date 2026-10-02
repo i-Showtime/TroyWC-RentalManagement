@@ -238,18 +238,7 @@ public class ApplicationsController(ApplicationDbContext context, UserManager<Id
         if (!ModelState.IsValid)
             return Wizard(model);
 
-        var now = DateTimeOffset.UtcNow;
-        application.History.Add(new ApplicationHistory
-        {
-            OccurredTime = now,
-            ActorUserId = UserId,
-            ActorRole = Roles.Applicant,
-            EventType = "Submitted",
-            FromStatus = application.Status.ToString(),
-            ToStatus = nameof(AppStatus.Submitted),
-        });
-        application.Status = AppStatus.Submitted;
-        application.Submitted = now;
+        ApplicationWorkflow.Move(application, AppStatus.Submitted, UserId, Roles.Applicant, DateTimeOffset.UtcNow);
 
         if (!await TrySaveAsync(application, rowVersion, ct))
             return ChangedElsewhere(nameof(Review), id);
@@ -284,12 +273,13 @@ public class ApplicationsController(ApplicationDbContext context, UserManager<Id
         return ModelState.GetFieldValidationState(prefix) != ModelValidationState.Invalid;
     }
 
-    /// <summary>The current user's application with its unit and primary applicant's residences.</summary>
+    /// <summary>The current user's application with its unit, comments and primary applicant's residences.</summary>
     private Task<RentalApplication?> LoadApplicationAsync(int id, bool tracked, CancellationToken ct)
     {
         var query = context.RentalApplications
             .Include(a => a.Unit).ThenInclude(u => u.Property)
             .Include(a => a.Applicants.Where(p => p.IsPrimary)).ThenInclude(p => p.Residences)
+            .Include(a => a.Comments)
             .AsSplitQuery()
             .Where(a => a.Id == id && a.CreatedByUserId == UserId);
 

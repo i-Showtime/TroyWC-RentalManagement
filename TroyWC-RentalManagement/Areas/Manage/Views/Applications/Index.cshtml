@@ -1,0 +1,30 @@
+@model ApplicationsIndexViewModel
+@{
+    ViewData["Title"] = "Applications";
+}
+
+<h1 class="h3 mb-3">Applications</h1>
+
+<partial name="_FlashMessages" />
+
+<form method="get" asp-action="Index" class="row g-2 align-items-center mb-3">
+    <div class="col-auto">
+        <label asp-for="Status" class="col-form-label">Status</label>
+    </div>
+    <div class="col-auto">
+        <select asp-for="Status" asp-items="Model.Statuses" class="form-select" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+        </select>
+    </div>
+    <noscript>
+        <div class="col-auto"><button type="submit" class="btn btn-outline-secondary">Filter</button></div>
+    </noscript>
+</form>
+
+<div id="applications-grid" data-grid data-grid-url="@(Context.Request.PathBase + Context.Request.Path + Context.Request.QueryString)">
+    <partial name="_Grid" model="Model.Grid" />
+</div>
+
+@section Scripts {
+    <script src="~/js/crud-grid.js" asp-append-version="true"></script>
+}

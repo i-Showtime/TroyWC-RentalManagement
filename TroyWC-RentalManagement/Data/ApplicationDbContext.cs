@@ -32,6 +32,18 @@ public class ApplicationDbContext(DbContextOptions options)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
+        // A unit can have only one active lease. The check in the approve action gives the friendly error;
+        // this catches two managers approving different applications for the same unit at the same time.
+        modelBuilder.Entity<Lease>(b =>
+        {
+            b.HasIndex(l => l.UnitId, "IX_Leases_UnitId_Active")
+                .IsUnique()
+                .HasFilter($"[Status] = {(int)LeaseStatus.Active}");
+
+            // Keep the plain foreign-key index too; the filtered one only covers active leases.
+            b.HasIndex(l => l.UnitId);
+        });
+
         modelBuilder.Entity<ApplicationApplicant>()
             .HasOne<IdentityUser>()
             .WithMany()

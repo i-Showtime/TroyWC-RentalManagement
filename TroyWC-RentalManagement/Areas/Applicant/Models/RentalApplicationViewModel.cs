@@ -51,6 +51,10 @@ public class RentalApplicationViewModel
     [BindNever, ValidateNever]
     public bool ResidenceHistoryCompleted { get; set; }
 
+    /// <summary>The property manager's latest comment, shown while the application is Returned or Denied.</summary>
+    [BindNever, ValidateNever]
+    public string? ManagerMessage { get; set; }
+
     /// <summary>Reopens the residence modal, e.g. to show its errors.</summary>
     [BindNever, ValidateNever]
     public bool ShowResidenceModal { get; set; }
@@ -60,9 +64,9 @@ public class RentalApplicationViewModel
 
     public bool CanSubmit => IsEditable && Id is not null && ApplicantInfoCompleted && ResidenceHistoryCompleted;
 
-    public string StatusLabel => Status == AppStatus.UnderReview ? "Under review" : Status.ToString();
+    public string StatusLabel => Status.ToLabel();
 
-    /// <param name="application">Loaded with Unit.Property and the primary applicant's residences.</param>
+    /// <param name="application">Loaded with Unit.Property, Comments and the primary applicant's residences.</param>
     public static RentalApplicationViewModel FromEntity(RentalApplication application, ApplicationStep step)
     {
         var applicant = application.Applicants.FirstOrDefault(a => a.IsPrimary);
@@ -82,6 +86,9 @@ public class RentalApplicationViewModel
             Status = application.Status,
             ApplicantInfoCompleted = application.ApplicantInfoCompleted,
             ResidenceHistoryCompleted = application.ResidenceHistoryCompleted,
+            ManagerMessage = application.Status is AppStatus.Returned or AppStatus.Denied
+                ? application.Comments.OrderByDescending(c => c.Created).Select(c => c.Body).FirstOrDefault()
+                : null,
         };
     }
 }

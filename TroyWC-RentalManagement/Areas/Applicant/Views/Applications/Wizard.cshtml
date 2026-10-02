@@ -8,14 +8,6 @@
         (Step: ApplicationStep.Residences, Title: "Residence history", Done: Model.ResidenceHistoryCompleted),
         (Step: ApplicationStep.Review, Title: "Review & submit", Done: Model.Status != AppStatus.Draft && Model.Status != AppStatus.Returned),
     };
-
-    var statusClass = Model.Status switch
-    {
-        AppStatus.Draft or AppStatus.Returned => "text-bg-secondary",
-        AppStatus.Approved => "text-bg-success",
-        AppStatus.Denied or AppStatus.Withdrawn => "text-bg-danger",
-        _ => "text-bg-primary",
-    };
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
@@ -25,7 +17,7 @@
             @Model.Unit.PropertyName – unit @Model.Unit.UnitNumber · @Model.Unit.BedroomsLabel · @Model.Unit.RentAmount.ToString("C")/month
         </div>
     </div>
-    <span class="badge fs-6 @statusClass">@Model.StatusLabel</span>
+    <span class="badge fs-6 @Model.Status.ToBadgeClass()">@Model.StatusLabel</span>
 </div>
 
 <partial name="_FlashMessages" />
@@ -34,12 +26,20 @@
 {
     <div class="alert alert-info" role="status">
         This application is @Model.StatusLabel.ToLowerInvariant() and can no longer be changed.
+        @if (Model.ManagerMessage is not null)
+        {
+            <div class="mt-2"><strong>Message from the property manager:</strong> @Model.ManagerMessage</div>
+        }
     </div>
 }
 else if (Model.Status == AppStatus.Returned)
 {
     <div class="alert alert-warning" role="status">
         This application was returned to you. Make any changes needed and submit it again.
+        @if (Model.ManagerMessage is not null)
+        {
+            <div class="mt-2"><strong>Message from the property manager:</strong> @Model.ManagerMessage</div>
+        }
     </div>
 }
 

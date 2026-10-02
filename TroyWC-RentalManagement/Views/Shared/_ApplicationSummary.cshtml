@@ -1,0 +1,73 @@
+@* Read-only summary of a rental application's applicant info and residence history.
+   Used by the applicant's review step and the property manager's application page.
+   ViewData["ForApplicant"] = true adds the completion badges and Edit links the applicant needs. *@
+@using TroyWC_RentalManagement.Areas.Applicant.Models
+@model RentalApplicationViewModel
+@{
+    var applicant = Model.Applicant;
+    var forApplicant = ViewData["ForApplicant"] is true;
+    var canEdit = forApplicant && Model.IsEditable;
+}
+
+<section class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h6 mb-0">Applicant information</h2>
+        @if (forApplicant)
+        {
+            <span>
+                <partial name="_SectionStatus" model="Model.ApplicantInfoCompleted" />
+                @if (canEdit)
+                {
+                    <a class="btn btn-sm btn-link" asp-area="Applicant" asp-controller="Applications" asp-action="Applicant" asp-route-id="@Model.Id">Edit</a>
+                }
+            </span>
+        }
+    </div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">@applicant.FirstName @applicant.LastName</dd>
+            <dt class="col-sm-3">Phone</dt>
+            <dd class="col-sm-9">@applicant.Phone</dd>
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@applicant.Email</dd>
+            <dt class="col-sm-3">Current address</dt>
+            <dd class="col-sm-9 mb-0">@applicant.CurrentAddress.ToSingleLine()</dd>
+        </dl>
+    </div>
+</section>
+
+<section class="card mb-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h6 mb-0">Residence history</h2>
+        @if (forApplicant)
+        {
+            <span>
+                <partial name="_SectionStatus" model="Model.ResidenceHistoryCompleted" />
+                @if (canEdit)
+                {
+                    <a class="btn btn-sm btn-link" asp-area="Applicant" asp-controller="Applications" asp-action="Residences" asp-route-id="@Model.Id">Edit</a>
+                }
+            </span>
+        }
+    </div>
+    @if (Model.Residences.Count == 0)
+    {
+        <div class="card-body text-muted">No prior residences.</div>
+    }
+    else
+    {
+        <ul class="list-group list-group-flush">
+            @foreach (var residence in Model.Residences)
+            {
+                <li class="list-group-item">
+                    <div class="fw-semibold">@residence.Address.ToSingleLine()</div>
+                    <div class="small text-muted">
+                        @IsoDate.Display(residence.MoveInDate) – @IsoDate.Display(residence.MoveOutDate)
+                        · Landlord: @residence.LandlordName, @residence.LandlordPhone
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>

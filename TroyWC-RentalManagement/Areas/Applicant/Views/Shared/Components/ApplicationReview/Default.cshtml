@@ -1,69 +1,11 @@
 @* Step 3: read-only summary of steps 1 and 2. Submit is the only action and only while the application is editable. *@
 @model RentalApplicationViewModel
-@{
-    var applicant = Model.Applicant;
-}
 
 <form method="post" asp-controller="Applications" asp-action="Submit" asp-route-id="@Model.Id">
     <input type="hidden" asp-for="RowVersion" />
     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-    <section class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="h6 mb-0">Applicant information</h2>
-            <span>
-                <partial name="_SectionStatus" model="Model.ApplicantInfoCompleted" />
-                @if (Model.IsEditable)
-                {
-                    <a class="btn btn-sm btn-link" asp-controller="Applications" asp-action="Applicant" asp-route-id="@Model.Id">Edit</a>
-                }
-            </span>
-        </div>
-        <div class="card-body">
-            <dl class="row mb-0">
-                <dt class="col-sm-3">Name</dt>
-                <dd class="col-sm-9">@applicant.FirstName @applicant.LastName</dd>
-                <dt class="col-sm-3">Phone</dt>
-                <dd class="col-sm-9">@applicant.Phone</dd>
-                <dt class="col-sm-3">Email</dt>
-                <dd class="col-sm-9">@applicant.Email</dd>
-                <dt class="col-sm-3">Current address</dt>
-                <dd class="col-sm-9 mb-0">@applicant.CurrentAddress.ToSingleLine()</dd>
-            </dl>
-        </div>
-    </section>
-
-    <section class="card mb-3">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="h6 mb-0">Residence history</h2>
-            <span>
-                <partial name="_SectionStatus" model="Model.ResidenceHistoryCompleted" />
-                @if (Model.IsEditable)
-                {
-                    <a class="btn btn-sm btn-link" asp-controller="Applications" asp-action="Residences" asp-route-id="@Model.Id">Edit</a>
-                }
-            </span>
-        </div>
-        @if (Model.Residences.Count == 0)
-        {
-            <div class="card-body text-muted">No prior residences.</div>
-        }
-        else
-        {
-            <ul class="list-group list-group-flush">
-                @foreach (var residence in Model.Residences)
-                {
-                    <li class="list-group-item">
-                        <div class="fw-semibold">@residence.Address.ToSingleLine()</div>
-                        <div class="small text-muted">
-                            @IsoDate.Display(residence.MoveInDate) – @IsoDate.Display(residence.MoveOutDate)
-                            · Landlord: @residence.LandlordName, @residence.LandlordPhone
-                        </div>
-                    </li>
-                }
-            </ul>
-        }
-    </section>
+    <partial name="_ApplicationSummary" model="Model" view-data='new ViewDataDictionary(ViewData) { ["ForApplicant"] = true }' />
 
     <div class="d-flex justify-content-between align-items-center mt-4">
         <a class="btn btn-outline-secondary" asp-controller="Applications" asp-action="Residences" asp-route-id="@Model.Id">Back</a>

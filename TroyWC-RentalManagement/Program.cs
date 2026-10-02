@@ -27,14 +27,16 @@ builder.Services.AddScoped<DevDataSeeder>();
 
 var app = builder.Build();
 
+// Apply pending migrations in Development, or wherever Database:MigrateOnStartup is set (the integration tests).
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.Migrate(); // Apply pending migrations   
-}
     app.UseMigrationsEndPoint();
     app.MapOpenApi();
     app.MapScalarApiReference();    
@@ -75,3 +77,6 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+// Lets the integration tests (TroyWC-RentalManagement.Tests) host the app with WebApplicationFactory<Program>.
+public partial class Program;
