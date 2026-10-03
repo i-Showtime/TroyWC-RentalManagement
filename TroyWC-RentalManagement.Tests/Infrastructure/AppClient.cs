@@ -10,6 +10,14 @@ public sealed class AppClient(HttpClient http)
 {
     public async Task<HtmlPage> GetAsync(string url) => await HtmlPage.ReadAsync(await http.GetAsync(url));
 
+    /// <summary>GETs <paramref name="url"/> the way wwwroot/js/crud-grid.js does, which returns just the grid partial.</summary>
+    public async Task<HtmlPage> GetAjaxAsync(string url)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.Headers.Add("X-Requested-With", "XMLHttpRequest");
+        return await HtmlPage.ReadAsync(await http.SendAsync(request));
+    }
+
     /// <summary>Posts <paramref name="fields"/> (null values are left out) with <paramref name="from"/>'s antiforgery token.</summary>
     public Task<HttpResponseMessage> PostAsync(string url, HtmlPage from, IEnumerable<KeyValuePair<string, string?>> fields)
     {

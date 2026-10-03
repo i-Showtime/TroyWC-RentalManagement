@@ -51,7 +51,7 @@ public sealed class GridViewModel
         var values = new Dictionary<string, string>(RouteValues, StringComparer.OrdinalIgnoreCase);
 
         if (page > 1)
-            values["page"] = page.ToString(CultureInfo.InvariantCulture);
+            values[GridRequest.PageKey] = page.ToString(CultureInfo.InvariantCulture);
 
         if (PageSize != GridRequest.DefaultPageSize)
             values["pageSize"] = PageSize.ToString(CultureInfo.InvariantCulture);

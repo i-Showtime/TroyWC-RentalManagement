@@ -8,4 +8,7 @@ public class UnitRow
     public string UnitNumber { get; init; } = string.Empty;
     public int Bedrooms { get; init; }
     public decimal RentAmount { get; init; }
+
+    /// <summary>True while the unit has an active lease.</summary>
+    public bool IsLeased { get; init; }
 }

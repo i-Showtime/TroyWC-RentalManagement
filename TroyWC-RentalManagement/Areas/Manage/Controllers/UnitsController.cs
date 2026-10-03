@@ -192,7 +192,7 @@ public class UnitsController(ApplicationDbContext context) : Controller
 
     private GridDefinition<UnitRow> BuildGrid() => new()
     {
-        Columns = UnitGrid.Columns,
+        Columns = [.. UnitGrid.Columns, UnitGrid.LeaseStatusColumn],
         Key = r => r.Id,
         DefaultSort = UnitGrid.DefaultSort,
         ThenBy = UnitGrid.ThenBy,

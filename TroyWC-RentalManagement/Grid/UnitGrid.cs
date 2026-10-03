@@ -13,6 +13,7 @@ public static class UnitGrid
         UnitNumber = u.UnitNumber,
         Bedrooms = u.Bedrooms,
         RentAmount = u.RentAmount,
+        IsLeased = u.Leases.Any(l => l.Status == LeaseStatus.Active),
     };
 
     public static IReadOnlyList<GridColumn<UnitRow>> Columns { get; } =
@@ -22,6 +23,10 @@ public static class UnitGrid
         GridColumn<UnitRow>.For(r => r.Bedrooms, "Bedrooms", display: FormatBedrooms),
         GridColumn<UnitRow>.For(r => r.RentAmount, "Rent", format: "C"),
     ];
+
+    /// <summary>Leased or Available. Only the property managers' Units grid shows it; the home page lists available units only.</summary>
+    public static GridColumn<UnitRow> LeaseStatusColumn { get; } =
+        GridColumn<UnitRow>.For(r => r.IsLeased, "Status", display: leased => leased ? "Leased" : "Available");
 
     public const string DefaultSort = "property";
 
